@@ -15,7 +15,14 @@ ui <- fluidPage(
   
   # sidebar function takes these 2 args
   sidebarLayout(position = "right",
-                sidebarPanel("sidebar panel"),
+                sidebarPanel(
+                  helpText("Change size of image."),
+                  
+                  sliderInput("size_slider", 
+                                    label = "Size of image:",
+                                    min = 0, max = 100, value = 50)
+                  
+                ),
                 mainPanel(
                   h1("First Level title", align="center"),
                   h2("Second Level title", align="center"),
@@ -42,7 +49,8 @@ ui <- fluidPage(
                   # do things like change height=something$dimension, width=something$dimension too maybe?
                   # go through lesson 4 first
                   
-                  imageOutput("drawing", width=200, height=200)
+                  #imageOutput("drawing", width=200, height=200)
+                 imageOutput("drawing", width=200, height=200)
                 )
                 
   )
@@ -53,13 +61,19 @@ server <- function(input, output) {
   
   # initializations
   turn_val <<- 0
+  filename <<- "www/drawing_0.png"
+  dimension <<- 200
+
   output$drawing <- renderImage({
-    list(src = "www/drawing_0.png")
+    list(src = filename)
   }, deleteFile=FALSE)
   
-  # Load different images depending on action button press!
+  
+  # Load different images (action button press)
   observeEvent(input$turn_button, {
     # 0, 1, 2, 3
+    
+    # run function to output drawing w/ size, etc.
     turn_val <<- turn_val + 1
     
     if(turn_val == 4){
@@ -68,17 +82,34 @@ server <- function(input, output) {
    
     output$drawing <- renderImage({
       if(turn_val == 0){
-        filename = "www/drawing_0.png"
+        filename <<- "www/drawing_0.png"
       } else if (turn_val == 1) {
-        filename = "www/drawing_90.png"
+        filename <<- "www/drawing_90.png"
       } else if (turn_val == 2) {
-        filename = "www/drawing_180.png"
+        filename <<- "www/drawing_180.png"
       } else {
-        filename = "www/drawing_270.png"
+        filename <<- "www/drawing_270.png"
       }
-      list(src = filename)
+      
+      list(src = filename,
+           width = dimension,
+           height = dimension)
       
     }, deleteFile=FALSE)
+    
+  })
+  
+  # change dimensions of image (slider)
+  observeEvent(input$size_slider, {
+    dimension <<- 4 * input$size_slider
+    
+    output$drawing <- renderImage({
+      list(src = filename,
+           width = dimension,
+           height = dimension)
+      
+    }, deleteFile=FALSE)
+
     
   })
   
